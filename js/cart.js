@@ -6,6 +6,8 @@
 //
 // TODO: importera din subtotal från receipt.js, du behöver den i total().
 
+import { findProduct, subtotal } from "./receipt.js";
+
 export const createCart = (products) => {
   // Varukorgens minne. let, eftersom du byter ut arrayen vid varje ändring.
   // Raderna ser ut som i data.js: { productId: 'latte', quantity: 2 }
@@ -14,17 +16,31 @@ export const createCart = (products) => {
   const add = (productId, quantity = 1) => {
     // TODO 1: Finns produkten? Annars: throw new Error(`Okänd produkt: ${productId}`)
     //         Tips: products.some(...) eller din findProduct från del A.
+     
+    if (!findProduct(products, productId)) {
+      throw new Error(`Okänd produkt: ${productId}`);
+    };
 
     // TODO 2: Finns produkten redan i lines?
     //   - Ja:  map över lines och returnera en ny rad med större quantity för just den
     //          produkten. Ändra inte den gamla raden, skapa en ny: { ...line, quantity: ... }
     //   - Nej: en ny array med alla gamla rader plus den nya: [...lines, { productId, quantity }]
     // Tilldela resultatet till lines. Inga push.
+
+    const exists = lines.some((line) => line.productId === productId);
+    lines = exists
+    ? lines.map((line) =>
+    line.productId === productId
+  ? { ...line, quantity: line.quantity + quantity}
+: line)
+: [...lines, { productId, quantity }];
   };
 
   const remove = (productId) => {
     // TODO 3: en ny array utan raden för productId. Vilken arraymetod väljer bort saker?
     //         Inga splice.
+
+    lines = lines.filter((line) => line.productId !== productId);
   };
 
   return {
@@ -32,9 +48,10 @@ export const createCart = (products) => {
     remove,
     // TODO 4: lines() ska returnera en kopia, så att ingen utanför kan ändra i varukorgen.
     // TODO 5: total() räknar summan med din subtotal från del A.
+    lines: () => lines.map((line) => ({ ...line })),
+    total: () => subtotal(lines, products),
   };
 };
-
 // Testa i main.js, till exempel:
 //
 //   import { products } from './data.js';
